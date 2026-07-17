@@ -1,0 +1,62 @@
+/* @font-face {
+	font-family: "Jost";
+	src: url("../fonts/Jost-VariableFont_wght.ttf") format("truetype"
+		);
+} */
+
+/* :root {
+	--main-color: #0f1219;
+	--main-color-font: #f3f3f3;
+} */
+
+* {
+	padding: 0;
+	margin: 0;
+
+	/* font-family: "Jost"; */
+
+	hr {
+		opacity: 0.25;
+		margin: 10px 0;
+	}
+
+	.frow {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.fcol {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.error_font {
+		color: red;
+	}
+
+	.success_font {
+		color: green;
+	}
+}
+
+html {
+	/* background-color: #fff; */
+
+	body {
+		padding: 20px;
+		margin: 0 15%;
+
+		max-width: 85%;
+		/* background-color: var(--main-color);
+		color: var(--main-color-font); */
+
+		/* landing */
+		#land {
+			align-items: flex-start;
+		}
+	}
+}

@@ -2,7 +2,11 @@
 
 **swCV** is a Curriculum Vitae manager and builder written entirely in PHP. swCV allows you to create a dynamically generated view with separate, dedicated sections for different personal aspects and projects, making it perfect for developers or as a personal portfolio.
 
-Current version: 0.0.0
+Current version: **0.0.1**
+
+> [!WARNING]
+>
+> THIS PROJECT IS STILL ON A VERY EARLY ALPHA STATE. UNDER NO CIRCUNSTANCE USE THIS, ANYWHERE.
 
 ---
 
@@ -34,16 +38,37 @@ Download the [installer.html](installer.html) file and run it in your web browse
 To install swCV, follow the steps in the [installer.html](installer.html) file.
 
 The installer will ask you for:
-
 - DB credentials.
 - Admin credentials.
-- Initial configuration (Allow tracking, sections, etc)
+- Initial configuration (Allow tracking, sections, etc.)
 
-The installer.html will create a `config.php` file, which you have to place in the root directory of your web server.
+The installer will generate a `.env` file, which must be placed inside the `src/` directory.
 
 > [!WARNING]
->
-> The `config.php` file contains sensitive information about your database and admin credentials. Make sure to keep it secure and not expose it to the public. Also **swCV** requires this file to be able to run any of the application's features.
+> The `.env` file contains sensitive database credentials and application settings. 
+> Ensure this file remains secure and is never committed to public repositories (it is included in `.gitignore` by default).
+
+## Architecture & Features 🏗️
+
+- **Front Controller & Routing:** All requests are routed through `index.php` to `router.php`, bootstrapping the application and cleanly rendering views.
+- **Secure Database Abstraction:** Powered by a MySQLi wrapper supporting secure prepared statements (`sql()` and `select()`) to prevent SQL Injection vulnerabilities.
+- **Lightweight `.env` Configuration:** Loads settings on-demand per request using a zero-dependency environment parser.
+- **Localization Support:** Translates views dynamically using fast, cached PHP array translation keys (located in `src/lang/`).
+
+### Environment Variables Configuration (.env)
+
+Here is a standard example of the configuration structure inside `src/.env`:
+
+```env
+'host' = "localhost"
+'user' = "root"
+'pass' = ""
+'name' = "swCV"
+'sql_generic_error' = "false"
+'sql_generic_error_msg' = "SQL execution error."
+'version' = "001"
+'lang' = "en"
+```
 
 ## Using swCV 💻
 
