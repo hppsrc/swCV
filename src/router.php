@@ -3,7 +3,7 @@
 /*
 	swCV router.php file
 	Hppsrc 2026
-	Based on version 0.0.1
+	Based on version 0.1.0-alpha
 	? Simple routing for index and views including
 */
 
@@ -13,41 +13,70 @@ if (session_status() === PHP_SESSION_NONE) {
 
 ob_start();
 
-include_once "constants/constants.php";
+// import constants
+require_once "constants/constants.php";
 
 // import meta and envs
-include_once "utils/env_parser.php";
+require_once "utils/env_parser.php";
 
 // import general controllers
-include_once "controller/app.php";
-include_once "controller/general.php";
-include_once "controller/user.php";
-include_once "controller/builder.php";
+require_once "controller/app.php";
+require_once "controller/general.php";
+require_once "controller/user.php";
+require_once "controller/builder.php";
 
 try {
 
 	load_env();
 	app_check_env();
-	app_load_lang();
 
 	// import client controller after css and envs
-	include_once "controller/client.php";
+	require_once "controller/client.php";
+
+	app_load_lang();
+
+	builder_header();
+
+	user_is_admin_setup();
 
 	general_check_router();
 
-	// add header
-	builder_header();
+	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['a'])) {
+
+		$action = $_GET['a'];
+
+		switch ($action) {
+			case 'setup':
+				app_setup();
+				break;
+
+		}
+
+	}
 
 	// set route if not found
-	$path = isset($_GET['v']) && !empty($_GET['v']) ? $_GET['v'] : 'setup';
+	$path = isset($_GET['v']) && !empty($_GET['v']) ? $_GET['v'] : general_redir("?v=main");
+
+	general_get_alert();
 
 	// routing
 	switch ($path) {
+
 		case 'setup':
-			builder_body("setup.php");
+			builder_body("setup");
 			break;
+
+		case 'welcome':
+			builder_body("welcome");
+			break;
+
+		case 'main':
+			builder_body("main");
+			break;
+
+		// 404
 		default:
-			builder_body("404.php");
+			builder_body("404");
 			break;
 	}
 

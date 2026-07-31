@@ -1,0 +1,183 @@
+<!--
+
+
+	swCV installer.html file
+	Hppsrc 2026
+	Based on version 0.1.0-alpha
+	? SQL generation html file
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>swCV installer</title>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+	<script src="https://unpkg.com/feather-icons"></script>
+
+</head>
+
+<body>
+
+	<h1>swCV installer</h1>
+
+	<hr>
+
+	<p>Welcome to the swCV installer. This file allows you to create an SQL file containing the tables needed for your
+		MySQL database, as well as administrator access, system language, and various other details.</p>
+
+	<form id="installer-form">
+		<h2>Admin Access</h2>
+
+		<label for="user_access">Admin Username</label>
+		<input type="text" id="user_access" name="user_access" maxlength="50" placeholder="admin" required>
+
+		<label for="user_password">Admin Password</label>
+		<input type="password" id="user_password" name="user_password" maxlength="500" placeholder="********"
+			pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_\-]).{8,}"
+			title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*_-)"
+			required>
+
+		<hr>
+
+		<h2>General Behavior</h2>
+
+		<label>
+			<input type="checkbox" id="show_last_update" name="show_last_update" checked>
+			Show the last time swCV information was updated (Recommended)
+		</label>
+
+		<label>
+			<input type="checkbox" id="public_view" name="public_view" checked>
+			Allow the site to be viewed by anyone accessing the page (otherwise, a privacy notice will be shown,
+			Recommended)
+		</label>
+
+		<label>
+			<input type="checkbox" id="dinamic_web_title" name="dinamic_web_title" checked>
+			Show the active view name in the browser title instead of just the username (Recommended)
+		</label>
+
+		<label>
+			<input type="checkbox" id="blog_enabled" name="blog_enabled">
+			Enable blogging features for swCV
+		</label>
+
+		<label>
+			<input type="checkbox" id="blog_comments_enabled" name="blog_comments_enabled" checked>
+			Allow anyone to comment on blog posts without registration (managed by IP)
+		</label>
+
+		<label>
+			<input type="checkbox" id="blog_likes_enabled" name="blog_likes_enabled" checked>
+			Allow anyone to like/dislike blog posts without registration (managed by IP)
+		</label>
+
+		<hr>
+
+		<h2>Language</h2>
+		<p>Set a language for swCV. Currently, English is the only available option.</p>
+
+		<select id="swCV_language" name="swCV_language" disabled>
+			<option value="en" selected>English</option>
+		</select>
+
+		<hr>
+
+		<button type="submit" id="create-btn">Create SQL</button>
+	</form>
+
+	<script>
+		document.getElementById('installer-form').addEventListener('submit', async function (event) {
+			event.preventDefault();
+
+			const createBtn = document.getElementById('create-btn');
+			createBtn.disabled = true;
+			createBtn.textContent = 'Generating SQL...';
+
+			try {
+				// 1. Fetch the base scheme.sql file
+				const response = await fetch('../database/scheme.sql');
+				if (!response.ok) {
+					throw new Error('Could not load database scheme.sql file.');
+				}
+				const sqlBase = await response.text();
+
+				// 2. Gather form values
+				const userAccess = document.getElementById('user_access').value;
+				const rawPassword = document.getElementById('user_password').value;
+
+				// Hash the password using bcryptjs (standard blowfish, 10 rounds)
+				const bcrypt = dcodeIO.bcrypt;
+				const salt = bcrypt.genSaltSync(10);
+				const hashedPassword = bcrypt.hashSync(rawPassword, salt);
+
+				// Checkbox mappings (1 for checked, 0 for unchecked)
+				const showLastUpdate = document.getElementById('show_last_update').checked ? 1 : 0;
+				const publicView = document.getElementById('public_view').checked ? 1 : 0;
+				const dinamicWebTitle = document.getElementById('dinamic_web_title').checked ? 1 : 0;
+				const blogEnabled = document.getElementById('blog_enabled').checked ? 1 : 0;
+				const blogCommentsEnabled = document.getElementById('blog_comments_enabled').checked ? 1 : 0;
+				const blogLikesEnabled = document.getElementById('blog_likes_enabled').checked ? 1 : 0;
+
+				// 3. Build the INSERT query
+				const insertSql = `
+--
+-- Dumping initial setup data for table \`general\`
+--
+
+INSERT INTO \`general\` (
+  \`user_access\`,
+  \`user_password\`,
+  \`show_last_update\`,
+  \`public_view\`,
+  \`dinamic_web_title\`,
+  \`blog_enabled\`,
+  \`blog_comments_enabled\`,
+  \`blog_likes_enabled\`,
+  \`swCV_language\`
+) VALUES (
+  '${userAccess.replace(/'/g, "\\'")}',
+  '${hashedPassword}',
+  ${showLastUpdate},
+  ${publicView},
+  ${dinamicWebTitle},
+  ${blogEnabled},
+  ${blogCommentsEnabled},
+  ${blogLikesEnabled},
+  'en'
+);
+`;
+
+				// 4. Combine and trigger download
+				const finalSql = sqlBase + "\n" + insertSql;
+				const blob = new Blob([finalSql], { type: 'text/plain;charset=utf-8' });
+				const url = URL.createObjectURL(blob);
+
+				const link = document.createElement('a');
+				link.href = url;
+				link.download = 'setup.sql';
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+
+				createBtn.textContent = 'SQL Created!';
+			} catch (error) {
+				alert('Error: ' + error.message);
+				createBtn.textContent = 'Create SQL';
+			} finally {
+				createBtn.disabled = false;
+			}
+		});
+	</script>
+
+</body>
+
+</html>

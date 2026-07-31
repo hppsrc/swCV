@@ -3,13 +3,14 @@
 /*
 	swCV header.php file
 	Hppsrc 2026
-	Based on version 0.0.1
+	Based on version 0.1.0-alpha
 	? loads head and UNFINISHED html tags
 */
 
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang=" <?php general_print_lang('LANG_CODE'); ?> ">
 
 <head>
 

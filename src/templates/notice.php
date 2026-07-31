@@ -1,12 +1,22 @@
+<?php
+
+/*
+	swCV notice.php file
+	Hppsrc 2026
+	Based on version 0.1.0-alpha
+	? loads footer and finish UNFINISHED html tags
+*/
+
+?>
+
 <div style="
 		background-color: darkred;
-		color: black ;
-		border: solid red 2px;
-		border-radius: 1em;
+		color: black;
+		border: solid red 1px;
 		border-style: dashed;
-		padding: 1em 2em;
+		padding: 0.5em 2em;
 		font-family: monospace;
+		font-size: small;
 	">
-	<h2>THIS PROJECT IS IN AN EARLY DEVELOPMENT PHASE. UNDER NO CIRCUMSTANCE SHOULD IT BE USED IN A PRODUCTION
-		ENVIRONMENT.</h2>
+	<h2> <?php general_print_lang('NO_PROD_NOTICE'); ?> </h2>
 </div>

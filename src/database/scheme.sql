@@ -1,9 +1,10 @@
 --
 --
 --
---	swCV schema.sql
+--	swCV schema.sql file
 --	Hppsrc 2026
---	Based on version 0.0.1
+--	Based on version 0.1.0-alpha
+--	? SQL scheme file
 --
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -45,13 +46,10 @@ CREATE TABLE `userinfo` (
   `social_web` varchar(50) NOT NULL,
   `social_email` varchar(50) NOT NULL,
   `social_phone` varchar(50) NOT NULL,
-  `social_switches` varchar(8) NOT NULL DEFAULT '0000000',
-  `birthday` timestamp NOT NULL DEFAULT current_timestamp(),
+  `social_switches` varchar(8) NOT NULL DEFAULT '00000000',
+  `birthday` date NOT NULL,
   `show_age` tinyint(4) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

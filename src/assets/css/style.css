@@ -1,19 +1,28 @@
-/* @font-face {
+/*
+
+
+	swCV style.css file
+	Hppsrc 2026
+	Based on version 0.1.0-alpha
+	? Custom styling
+*/
+
+@font-face {
 	font-family: "Jost";
 	src: url("../fonts/Jost-VariableFont_wght.ttf") format("truetype"
 		);
-} */
+}
 
-/* :root {
+:root {
 	--main-color: #0f1219;
 	--main-color-font: #f3f3f3;
-} */
+}
 
 * {
 	padding: 0;
 	margin: 0;
 
-	/* font-family: "Jost"; */
+	font-family: "Jost";
 
 	hr {
 		opacity: 0.25;
@@ -47,16 +56,33 @@ html {
 	/* background-color: #fff; */
 
 	body {
+
 		padding: 20px;
 		margin: 0 15%;
 
 		max-width: 85%;
-		/* background-color: var(--main-color);
-		color: var(--main-color-font); */
 
-		/* landing */
-		#land {
-			align-items: flex-start;
+		main {
+			/* background-color: var(--main-color);
+			color: var(--main-color-font); */
+
+			/* landing */
+			#setup {
+				align-items: flex-start;
+			}
+
+			.setup_rows {
+				justify-content: space-between;
+
+				/* width: 100%; */
+
+				@media (min-width: 768px) {
+					min-width: 90%;
+					padding: 0 50% 0 0;
+				}
+			}
+
 		}
+
 	}
 }

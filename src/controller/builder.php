@@ -3,24 +3,40 @@
 /*
 	swCV builder.php file
 	Hppsrc 2026
-	Based on version 0.0.1
+	Based on version 0.1.0-alpha
 	? Build HTML structure
 */
 
-function builder_header()
+// adds header
+function builder_header(): void
 {
-	include_once "templates/header.php";
+	include "templates/header.php";
 }
 
-function builder_body($view)
+// adds body
+function builder_body(string $v): void
 {
-	echo "<main>";
-	include_once "templates/notice.php";
-	include_once "views/" . $view;
+
+	$p = "views/" . $v . ".php";
+
+	echo "<body>";
+	echo "<main id='$v'>";
+
+	require "templates/notice.php";
+
+	if (file_exists($p)) {
+		include $p;
+	} else {
+		include "views/404.php";
+	}
+
 	echo "</main>";
+	echo "</body>";
+
 }
 
-function builder_footer()
+// add footer
+function builder_footer(): void
 {
-	include_once "templates/footer.php";
+	require "templates/footer.php";
 }

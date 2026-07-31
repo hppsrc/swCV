@@ -1,0 +1,31 @@
+#
+#
+#
+#	swCV .htaccess file
+#	Hppsrc 2026
+#	Based on version 0.1.0-alpha
+#	? .htaccess configuration file
+#
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /src/
+
+    RewriteRule ^(\.env|database/|.*\.sql) - [F,L,NC]
+
+    RewriteCond %{THE_REQUEST} \s/src/index\.php[?\s] [NC]
+    RewriteRule ^index\.php$ /src/ [R=301,L,QSA]
+
+    RewriteCond %{THE_REQUEST} \s/src/(controller|views|templates|utils|lang)/[^\s?]+ [NC]
+    RewriteRule ^ /src/ [R=301,L,QSA]
+
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ [NC]
+    RewriteRule ^ - [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !^/src/index\.php$ [NC]
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+Options -Indexes -MultiViews
