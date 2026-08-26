@@ -22,12 +22,11 @@ CREATE TABLE `general` (
   `user_access` varchar(50) NOT NULL,
   `user_password` varchar(500) NOT NULL,
   `show_last_update` tinyint(1) NOT NULL,
-  `last_update` timestamp NOT NULL DEFAULT current_timestamp(),
-  `squema_version` varchar(5) NOT NULL DEFAULT '001',
-  `swCV_language` varchar(5) NOT NULL DEFAULT 'en',
+  `squema_version` varchar(5) NOT NULL DEFAULT '002',
   `show_welcome` tinyint(1) NOT NULL DEFAULT 1,
+  `last_update` timestamp NOT NULL DEFAULT current_timestamp(),
+  `system_language` varchar(5) NOT NULL DEFAULT 'en',
   `public_view` tinyint(1) NOT NULL DEFAULT 1,
-  `dinamic_web_title` tinyint(1) NOT NULL DEFAULT 1,
   `blog_enabled` tinyint(1) NOT NULL DEFAULT 0,
   `blog_comments_enabled` tinyint(1) NOT NULL DEFAULT 1,
   `blog_likes_enabled` tinyint(1) NOT NULL DEFAULT 1
@@ -50,6 +49,8 @@ CREATE TABLE `userinfo` (
   `birthday` date NOT NULL,
   `show_age` tinyint(4) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 COMMIT;
 

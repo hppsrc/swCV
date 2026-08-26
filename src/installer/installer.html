@@ -3,7 +3,7 @@
 
 	swCV installer.html file
 	Hppsrc 2026
-	Based on version 0.1.0-alpha
+	Based on version 0.2.0-alpha
 	? SQL generation html file
 
 -->
@@ -32,6 +32,8 @@
 	<p>Welcome to the swCV installer. This file allows you to create an SQL file containing the tables needed for your
 		MySQL database, as well as administrator access, system language, and various other details.</p>
 
+	<small>This installed is only availible on english.</small>
+
 	<form id="installer-form">
 		<h2>Admin Access</h2>
 
@@ -39,8 +41,8 @@
 		<input type="text" id="user_access" name="user_access" maxlength="50" placeholder="admin" required>
 
 		<label for="user_password">Admin Password</label>
-		<input type="password" id="user_password" name="user_password" maxlength="500" placeholder="********"
-			pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_\-]).{8,}"
+		<input type="password" id="user_password" name="user_password" minlength="1" maxlength="500"
+			placeholder="********" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_\-]).{8,}"
 			title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*_-)"
 			required>
 
@@ -57,11 +59,6 @@
 			<input type="checkbox" id="public_view" name="public_view" checked>
 			Allow the site to be viewed by anyone accessing the page (otherwise, a privacy notice will be shown,
 			Recommended)
-		</label>
-
-		<label>
-			<input type="checkbox" id="dinamic_web_title" name="dinamic_web_title" checked>
-			Show the active view name in the browser title instead of just the username (Recommended)
 		</label>
 
 		<label>
@@ -84,7 +81,7 @@
 		<h2>Language</h2>
 		<p>Set a language for swCV. Currently, English is the only available option.</p>
 
-		<select id="swCV_language" name="swCV_language" disabled>
+		<select id="system_language" name="system_language" disabled>
 			<option value="en" selected>English</option>
 		</select>
 
@@ -121,7 +118,6 @@
 				// Checkbox mappings (1 for checked, 0 for unchecked)
 				const showLastUpdate = document.getElementById('show_last_update').checked ? 1 : 0;
 				const publicView = document.getElementById('public_view').checked ? 1 : 0;
-				const dinamicWebTitle = document.getElementById('dinamic_web_title').checked ? 1 : 0;
 				const blogEnabled = document.getElementById('blog_enabled').checked ? 1 : 0;
 				const blogCommentsEnabled = document.getElementById('blog_comments_enabled').checked ? 1 : 0;
 				const blogLikesEnabled = document.getElementById('blog_likes_enabled').checked ? 1 : 0;
@@ -137,17 +133,15 @@ INSERT INTO \`general\` (
   \`user_password\`,
   \`show_last_update\`,
   \`public_view\`,
-  \`dinamic_web_title\`,
   \`blog_enabled\`,
   \`blog_comments_enabled\`,
   \`blog_likes_enabled\`,
-  \`swCV_language\`
+  \`system_language\`
 ) VALUES (
   '${userAccess.replace(/'/g, "\\'")}',
   '${hashedPassword}',
   ${showLastUpdate},
   ${publicView},
-  ${dinamicWebTitle},
   ${blogEnabled},
   ${blogCommentsEnabled},
   ${blogLikesEnabled},

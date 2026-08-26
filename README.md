@@ -2,7 +2,7 @@
 
 **swCV** is a Curriculum Vitae manager and builder written entirely in PHP. swCV allows you to create a dynamically generated view with separate, dedicated sections for different personal aspects and projects, making it perfect for developers or as a personal portfolio.
 
-Current version: **0.1.0-alpha**
+Current version: **0.2.0-alpha**
 
 > [!WARNING]
 > THIS PROJECT IS IN AN EARLY DEVELOPMENT PHASE. UNDER NO CIRCUMSTANCES SHOULD IT BE USED IN A PRODUCTION ENVIRONMENT.
@@ -64,8 +64,8 @@ Here is a standard example of the configuration structure inside `.env`:
 'name' = "swCV"
 'sql_generic_error' = "false"
 'sql_generic_error_msg' = "SQL execution error."
-'version' = "001"
-'lang' = "en"
+'lang' = "es"
+'FLAG_IGNORE_DB_LANG' = "false"  #optional flag
 ```
 
 ## Using swCV 💻

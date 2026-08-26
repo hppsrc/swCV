@@ -3,13 +3,19 @@
 #
 #	swCV .htaccess file
 #	Hppsrc 2026
-#	Based on version 0.1.0-alpha
+#	Based on version 0.2.0-alpha
 #	? .htaccess configuration file
 #
 
 <IfModule mod_rewrite.c>
+	php_flag expose_php Off
+
     RewriteEngine On
     RewriteBase /src/
+
+    # allow the installer to fetch the scheme.sql file
+    RewriteCond %{HTTP_REFERER} installer\.html [NC]
+    RewriteRule ^database/.+\.sql$ - [L]
 
     RewriteRule ^(\.env|database/|.*\.sql) - [F,L,NC]
 
