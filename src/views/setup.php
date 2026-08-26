@@ -3,7 +3,7 @@
 /*
 	swCV setup.php file
 	Hppsrc 2026
-	Based on version 0.1.0-alpha
+	Based on version 0.2.0-alpha
 	? User setup
 */
 
@@ -184,22 +184,27 @@ if (user_is_setup()) {
 
 	<h4>
 		<label for="user_access">
-			<?php general_print_lang('SETUP_ADMIN_CREDENTIALS'); ?>
+			<?php general_print_lang('GENERAL_ADMIN_CREDENTIALS'); ?>
 		</label>
 	</h4>
 	<input name="user_access" id="user_access" type="text"
-		placeholder="<?php general_print_lang('SETUP_ADMIN_CREDENTIALS_PLACEHOLDER'); ?>" maxlength="50" minlength="1"
+		placeholder="<?php general_print_lang('GENERAL_ADMIN_CREDENTIALS_PLACEHOLDER'); ?>" maxlength="50" minlength="1"
 		required>
 
 	<h4>
 		<label for="user_password">
-			<?php general_print_lang('SETUP_PASSWORD_CREDENTIALS'); ?>
+			<?php general_print_lang('GENERAL_PASSWORD_CREDENTIALS'); ?>
 		</label>
 	</h4>
 	<input name="user_password" id="user_password" type="password"
-		placeholder="<?php general_print_lang('SETUP_PASSWORD_CREDENTIALS_PLACEHOLDER'); ?>" minlength="1" required>
+		placeholder="<?php general_print_lang('GENERAL_PASSWORD_CREDENTIALS_PLACEHOLDER'); ?>" minlength="1"
+		maxlength="500" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*_\-]).{8,}"
+		title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*_-)"
+		required>
 
 	<input type="hidden" name="social_switches" value="00000000" disabled>
+
+	<input type="hidden" name="csrf_token" value="<?= general_csrf_token() ?>">
 
 	<button type="submit"><?php general_print_lang('SETUP_SUBMIT'); ?></button>
 
