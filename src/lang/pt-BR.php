@@ -13,7 +13,7 @@ return [
 	"" => "",
 
 	// general lang data
-	"LANG_CODE" => "pt-BRconst",
+	"LANG_CODE" => "pt-BR",
 	"LANG_NAME" => "Português (Brasil)",
 
 	// general view

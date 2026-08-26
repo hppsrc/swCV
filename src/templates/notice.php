@@ -10,13 +10,15 @@
 ?>
 
 <div style="
-		background-color: darkred;
-		color: black;
-		border: solid red 1px;
+		background-color: var(--notice-bg);
+		color: var(--notice-font);
+		border: solid 2px var(--notice-border);
 		border-style: dashed;
 		padding: 0.5em 2em;
 		font-family: monospace;
 		font-size: small;
 	">
-	<h2> <?php general_print_lang('NO_PROD_NOTICE'); ?> </h2>
+	<h2>
+		<?php general_print_lang('NO_PROD_NOTICE'); ?>
+	</h2>
 </div>

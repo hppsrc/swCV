@@ -3,8 +3,8 @@
 /*
 	swCV 404.php file
 	Hppsrc 2026
-	Based on version 0.1.0-alpha
-	? User setup
+	Based on version 0.2.0-alpha
+	? 404 error
 */
 
 ?>
