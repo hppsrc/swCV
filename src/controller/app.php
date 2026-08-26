@@ -3,7 +3,7 @@
 /*
 	swCV app.php file
 	Hppsrc 2026
-	Based on version 0.1.0-alpha
+	Based on version 0.2.0-alpha
 	? General app server checks, mostly single checks or loads on running
 */
 
@@ -17,7 +17,6 @@ function app_check_env(): void
 		!isset($_ENV['pass']) ||
 		!isset($_ENV['sql_generic_error']) ||
 		!isset($_ENV['sql_generic_error_msg']) ||
-		!isset($_ENV['version']) ||
 		!isset($_ENV['lang'])
 	) {
 		throw new Exception("CATASTROPHIC ERROR: Critical variables from .env are missing. Please check you .env file.");
@@ -28,43 +27,47 @@ function app_check_env(): void
 // * AI assisted by Gemini 3.5 Low
 function app_load_lang(): void
 {
-	$lang = null;
+	$code = null;
 
-	try {
+	// skip database query if debug flag is enabled
+	if (($_ENV['FLAG_IGNORE_DB_LANG'] ?? false) !== true) {
 
-		// Attempt to read language from database
-		$res = client_select("SELECT swCV_language FROM general LIMIT 1");
-		if ($res && sizeof($res) > 0) {
-			$lang = $res[0]['swCV_language'];
+		try {
+
+			// Attempt to read language from database
+			$res = client_select("SELECT system_language FROM general LIMIT 1");
+			if ($res && sizeof($res) > 0) {
+				$code = $res[0]['system_language'];
+			}
+
+		} catch (Throwable $th) {
+			// Fallback to null
+			$code = null;
 		}
 
-	} catch (Throwable $th) {
-		// Fallback to null
-		$lang = null;
 	}
 
 	// Fallback to env file if database lang is not set
-	if (empty($lang)) {
-		$lang = get_env("lang");
+	if (empty($code)) {
+		$code = get_env("lang");
 	}
 
 	// Default to english if everything else is empty
-	if (empty($lang)) {
-		$lang = "en";
+	if (empty($code)) {
+		$code = "en";
 	}
 
-	$file = "lang/" . $lang . ".php";
+	$file = "lang/" . $code . ".php";
 
-	try {
-		if (file_exists($file)) {
-			$lang = include $file;
-		} else {
-			throw new Exception("CATASTROPHIC ERROR: $file file not found. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
-		}
-
-	} catch (Throwable $th) {
-		general_print_catch_and_exit($th);
+	if (!file_exists($file)) {
+		$file = "lang/en.php";
 	}
+
+	if (!file_exists($file)) {
+		throw new Exception("CATASTROPHIC ERROR: No language file found. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
+	}
+
+	$GLOBALS['lang'] = include $file;
 
 }
 
@@ -72,7 +75,7 @@ function app_load_lang(): void
 function app_show_welcome(): bool
 {
 
-	$res = client_select("SELECT * from general");
+	$res = client_select("SELECT `show_welcome` from general");
 
 	if (sizeof($res) == 0) {
 		throw new Exception("CATASTROPHIC ERROR: No data found in the 'show_welcome' column. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
@@ -82,9 +85,59 @@ function app_show_welcome(): bool
 
 }
 
+// check if display private screen or not
+function app_is_public(): bool
+{
+
+	$res = client_select("SELECT `public_view` from general");
+
+	if (sizeof($res) == 0) {
+		throw new Exception("CATASTROPHIC ERROR: No data found in the 'public_view' column. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
+	}
+
+	return (bool) $res[0]['public_view'];
+
+}
+
+// check if show last update
+function app_show_last_update(): bool
+{
+
+	$res = client_select("SELECT `show_last_update` from general");
+
+	if (sizeof($res) == 0) {
+		throw new Exception("CATASTROPHIC ERROR: No data found in the 'show_last_update' column. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
+	}
+
+	return (bool) $res[0]['show_last_update'];
+
+}
+
+function app_check_db_version(): void
+{
+
+	$res = client_select(
+		"SELECT `squema_version` FROM general LIMIT 1",
+	);
+
+	if (sizeof($res) == 0) {
+		throw new Exception("CATASTROPHIC ERROR: No data found in the 'squema_version' column. Your installation might be broken. Please reinstall swCV from GitHub.", 1);
+	}
+
+	if ($res[0]["squema_version"] !== constant("SQUEMA_VERSION")) {
+		throw new Exception("WARNING: Your database squema version isn't the expected to run this swCV version.<br><br>Please update your swCV database.<br><br>Your swCV " . constant("VERSION") . " expected squema version " . constant("SQUEMA_VERSION") . ", squema version on server is: " . $res[0]["squema_version"], 1);
+	}
+}
+
 // app setup
 function app_setup(): void
 {
+
+	if (!general_csrf_check()) {
+		general_set_alert(general_get_lang('GENERAL_CSRF_ERROR'));
+		general_redir("?v=dashboard");
+		exit();
+	}
 
 	function _internal_return_value($v)
 	{
@@ -223,7 +276,7 @@ function app_setup(): void
 
 	try {
 
-		client_start_transaction(null);
+		client_start_transaction();
 
 		$res = client_select(
 			"SELECT `user_access`, `user_password` FROM general WHERE `user_access` = ? LIMIT 1",
@@ -232,13 +285,13 @@ function app_setup(): void
 		);
 
 		if (empty($res) || sizeof($res) == 0) {
-			general_set_alert(general_get_lang('SETUP_ADMIN_ERROR'));
+			general_set_alert(general_get_lang('GENERAL_ADMIN_ERROR'));
 			general_redir("?v=setup");
 			exit();
 		}
 
 		if (!password_verify($user_password, $res[0]["user_password"])) {
-			general_set_alert(general_get_lang('SETUP_ADMIN_PASSWORD_ERROR'));
+			general_set_alert(general_get_lang('GENERAL_ADMIN_ERROR'));
 			general_redir("?v=setup");
 			exit();
 		}
@@ -295,4 +348,223 @@ function app_setup(): void
 		throw new Exception(client_get_error(), 1);
 	}
 
+}
+
+function app_get_general_values(): array
+{
+	try {
+
+		$res = client_select(
+			"SELECT
+			`show_last_update`, `last_update`, `system_language`,
+			`show_welcome`, `public_view`,
+			`blog_enabled`, `blog_comments_enabled`, `blog_likes_enabled`
+			FROM general LIMIT 1",
+		);
+
+		return $res[0];
+
+	} catch (Throwable $th) {
+		throw new Exception(client_get_error(), 1);
+	}
+}
+
+// IA assited by DeepSeek-v4-Pro
+function app_get_languages(): array
+{
+	$files = glob("lang/*.php");
+	$langs = [];
+	$base_total = 0;
+
+	foreach ($files as $f) {
+		$code = basename($f, ".php");
+		$data = include $f;
+		if (!is_array($data)) {
+			continue;
+		}
+		$langs[$code] = [
+			'code' => $data['LANG_CODE'] ?? $code,
+			'name' => $data['LANG_NAME'] ?? $code,
+			'total' => count($data),
+		];
+		if ($code === 'en') {
+			$base_total = count($data);
+		}
+	}
+
+	if ($base_total <= 0) {
+		$base_total = 1;
+	}
+
+	$result = [];
+	foreach ($langs as $lang) {
+		$lang['percent'] = (int) round(($lang['total'] / $base_total) * 100);
+		$result[] = $lang;
+	}
+
+	return $result;
+}
+
+function app_ajax_handler(string $request, bool $data): string
+{
+	switch ($request) {
+
+		case 'show_welcome':
+
+			if (!$data) {
+
+				try {
+
+					client_start_transaction();
+
+					$res = client_sql(
+						"UPDATE `general` SET `show_welcome` = 0"
+					);
+
+					if (!$res) {
+						throw new Exception;
+					}
+
+					client_commit();
+
+					return json_encode(
+						array(
+							"ok" => true,
+							"response" => general_get_lang('DASHBOARD_SUCCESS'),
+							"update" => "set_disabled",
+						)
+					);
+
+				} catch (Throwable $th) {
+
+					client_rollback();
+
+					return json_encode(
+						array(
+							"error" => general_get_lang('DASHBOARD_ERROR'),
+							"details" => client_get_error(),
+							"update" => "set_checked",
+						)
+					);
+
+				}
+
+			}
+
+			return json_encode(
+				array(
+					"ok" => true,
+					"response" => general_get_lang('DASHBOARD_DISABLED'),
+					"update" => "set_disabled",
+				)
+			);
+
+		case 'public_view':
+		case 'show_last_update':
+		case 'blog_enabled':
+		case 'blog_comments_enabled':
+		case 'blog_likes_enabled':
+
+			try {
+
+				client_start_transaction();
+
+				$res = client_sql(
+					"UPDATE `general` SET `$request` = ?",
+					[$data ? 1 : 0],
+					"i"
+				);
+
+				if (!$res) {
+					throw new Exception;
+				}
+
+				client_commit();
+
+				return json_encode(
+					array(
+						"ok" => true,
+						"response" => general_get_lang('DASHBOARD_SUCCESS'),
+						"update" => $data ? "set_checked" : "set_unchecked",
+					)
+				);
+
+			} catch (Throwable $th) {
+
+				client_rollback();
+
+				return json_encode(
+					array(
+						"error" => general_get_lang('DASHBOARD_ERROR'),
+						"details" => client_get_error(),
+						"update" => "set_checked",
+					)
+				);
+
+			}
+
+		case 'system_language':
+
+			$lang = $_GET['d'] ?? '';
+
+			$valid = array_column(app_get_languages(), 'code');
+			if (!in_array($lang, $valid, true)) {
+				return json_encode(
+					array(
+						"error" => general_get_lang('DASHBOARD_AJAX_ERROR'),
+						"details" => general_get_lang('DASHBOARD_AJAX_ERROR'),
+						"update" => "set_checked",
+					)
+				);
+			}
+
+			try {
+
+				client_start_transaction();
+
+				$res = client_sql(
+					"UPDATE `general` SET `system_language` = ?",
+					[$lang],
+					"s"
+				);
+
+				if (!$res) {
+					throw new Exception;
+				}
+
+				client_commit();
+
+				return json_encode(
+					array(
+						"ok" => true,
+						"response" => general_get_lang('DASHBOARD_SUCCESS'),
+						"update" => "set_checked",
+					)
+				);
+
+			} catch (Throwable $th) {
+
+				client_rollback();
+
+				return json_encode(
+					array(
+						"error" => general_get_lang('DASHBOARD_ERROR'),
+						"details" => client_get_error(),
+						"update" => "set_checked",
+					)
+				);
+
+			}
+
+		default:
+			http_response_code(400);
+			return json_encode(
+				array(
+					"error" => general_get_lang('DASHBOARD_AJAX_ERROR'),
+					"details" => general_get_lang('DASHBOARD_AJAX_ERROR'),
+					"update" => "set_checked",
+				)
+			);
+
+	}
 }
